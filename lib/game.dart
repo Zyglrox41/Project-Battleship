@@ -30,10 +30,11 @@ class GameMapState extends State<GameMap> {
   );
 
   void updateGoogleMap() async {
+    var pos = await location.getLocation();
     GoogleMapController cont = await _controller.future;
     setState(() {
       CameraPosition newPosition = CameraPosition(
-        target: LatLng(-37.569792, 143.887614),
+        target: LatLng(pos.latitude, pos.longitude),
         zoom: 15,
       );
       cont.animateCamera(CameraUpdate.newCameraPosition(newPosition));
@@ -63,17 +64,6 @@ class GameMapState extends State<GameMap> {
     });
   }
 
-  _moveToUser() async {    
-    var pos = await location.getLocation();
-    mapController.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        
-        zoom: 15.0,
-        )
-        )
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Stack(
@@ -89,8 +79,18 @@ class GameMapState extends State<GameMap> {
           bottom: 30,
           right: 10,
           child: FloatingActionButton(
+              heroTag: "PlaceMarkerButton",
               onPressed: _addmarker,              
               child: Icon(Icons.filter_tilt_shift,
+                  color: Colors.white, size: 50.0)),
+        ),
+        Positioned(
+          bottom: 30,
+          left: 10,
+          child: FloatingActionButton(
+              heroTag: "GoToUserButton",
+              onPressed: updateGoogleMap,              
+              child: Icon(Icons.pin_drop,
                   color: Colors.white, size: 50.0)),
         )
       ],
