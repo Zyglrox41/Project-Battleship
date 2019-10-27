@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "746309916579",
+    "firebase_url": "https://project-2-battleships.firebaseio.com",
+    "project_id": "project-2-battleships",
+    "storage_bucket": "project-2-battleships.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:746309916579:android:53137e39a748496825ac16",
+        "android_client_info": {
+          "package_name": "au.edu.federation.gps"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDeMg5xQqzcnS8Dzd4ojYoqV00mL8ywujs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
