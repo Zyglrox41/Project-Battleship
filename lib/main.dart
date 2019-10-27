@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           borderRadius: new BorderRadius.circular(10.0),
                           color: Color.fromARGB(255, 85, 107, 47),
                         ),
-                        child: new Text("Play",
+                        child: new Text("Start",
                             style: new TextStyle(
                                 fontFamily: 'Cartoon',
                                 fontSize: 30.0,

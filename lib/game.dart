@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:project_battleships/open_location_code.dart' as olc;
+import 'package:project_battleships/util/open_location_code.dart' as olc;
+import 'package:project_battleships/util/creategrid.dart';
 
 import 'dart:async';
 import 'package:geoflutterfire/geoflutterfire.dart';
@@ -25,14 +26,30 @@ class GameMapState extends State<GameMap> {
   Firestore firestore = Firestore.instance;
   Geoflutterfire geo = Geoflutterfire();
 
-  LatLng marker1 = new LatLng(-37.569792, 143.887614);
+  LatLng marker1 = new LatLng(-37.626250,143.891250);
   Location location = new Location();
   final Set<Marker> _onTapMarker = {};
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
+  BitmapDescriptor gridSquare, gridSquareSelected;
+
+  // Initiate before loading here
+  @override
+  void initState() {
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(96, 96)), 'android/assets/grid.png')
+        .then((onValue) {
+      gridSquare = onValue;
+    });
+    BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(96, 96)), 'android/assets/gridselected.png')
+        .then((onValue) {
+      gridSquareSelected = onValue;
+    });
+ }
 
   static CameraPosition _kUni = CameraPosition(
-    target: LatLng(-37.569792, 143.887614),
-    zoom: 20,
+    target: LatLng(-37.626250,143.891250),
+    zoom: 18,
   );
 
   void updateGoogleMap() async {
@@ -74,6 +91,25 @@ class GameMapState extends State<GameMap> {
     olc.encode(latlng.latitude, latlng.longitude);
   }
 
+  _genGrid(){
+    genPlusCodes();
+    List<LatLng> grid = latlngGrid();     
+
+    for(var i = 0;i<grid.length;++i){
+      var markerIdVal = getPlusCode(i);
+      MarkerId markerId = MarkerId(markerIdVal);
+       Marker marker = Marker(
+         markerId: markerId,
+         position: grid[i],
+         infoWindow: InfoWindow(title: markerIdVal),
+         icon: gridSquare,
+       );
+    setState(() {      
+      markers[markerId] = marker;
+    });
+    }
+  }
+
   Future<DocumentReference> _addGeoPoint() async {
     var pos = await location.getLocation();
     GeoFirePoint point = geo.point(latitude: pos.latitude,longitude: pos.longitude);
@@ -89,9 +125,12 @@ class GameMapState extends State<GameMap> {
       children: <Widget>[
         GoogleMap(
             onMapCreated: _onMapCreated,
-            mapType: MapType.hybrid,
+            mapType: MapType.satellite,
             myLocationButtonEnabled: true,
             initialCameraPosition: _kUni,
+            zoomGesturesEnabled: false,
+            //scrollGesturesEnabled: false,
+            rotateGesturesEnabled: false,
             markers: Set<Marker>.of(markers.values),
             onTap: (latlang) {
               if (_onTapMarker.length >= 1) {
@@ -123,8 +162,15 @@ class GameMapState extends State<GameMap> {
               heroTag: "QueryPositionButton",
               onPressed: _addGeoPoint,
               child: Icon(Icons.add, color: Colors.white, size: 50.0)),
+        ),
+        Positioned(
+          bottom: 10,
+          left: 150,
+          child: FloatingActionButton(
+              heroTag: "GenGrid",
+              onPressed: _genGrid,
+              child: Icon(Icons.add, color: Colors.white, size: 50.0)),
         )
-
       ],
     );
   }
