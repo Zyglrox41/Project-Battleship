@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:project_battleships/open_location_code.dart' as olc;
+
 import 'dart:async';
-//import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:location/location.dart';
+import 'package:rxdart/rxdart.dart';
 
 class Game extends StatelessWidget {
   @override
@@ -19,9 +22,12 @@ class GameMap extends StatefulWidget {
 class GameMapState extends State<GameMap> {
   Completer<GoogleMapController> _controller = Completer();
   GoogleMapController mapController;
+  Firestore firestore = Firestore.instance;
+  Geoflutterfire geo = Geoflutterfire();
+
   LatLng marker1 = new LatLng(-37.569792, 143.887614);
   Location location = new Location();
-
+  final Set<Marker> _onTapMarker = {};
   Map<MarkerId, Marker> markers = <MarkerId, Marker>{};
 
   static CameraPosition _kUni = CameraPosition(
@@ -64,35 +70,61 @@ class GameMapState extends State<GameMap> {
     });
   }
 
+  void _onAddMarkerButtonPressed(LatLng latlng) {
+    olc.encode(latlng.latitude, latlng.longitude);
+  }
+
+  Future<DocumentReference> _addGeoPoint() async {
+    var pos = await location.getLocation();
+    GeoFirePoint point = geo.point(latitude: pos.latitude,longitude: pos.longitude);
+    return firestore.collection('userlocation').add({
+      'position' : point.data,
+      'name' : 'User Query'
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Stack(
       children: <Widget>[
         GoogleMap(
-          onMapCreated: _onMapCreated,
-          mapType: MapType.hybrid,
-          myLocationButtonEnabled: true,
-          initialCameraPosition: _kUni,
-          markers: Set<Marker>.of(markers.values),
-        ),
+            onMapCreated: _onMapCreated,
+            mapType: MapType.hybrid,
+            myLocationButtonEnabled: true,
+            initialCameraPosition: _kUni,
+            markers: Set<Marker>.of(markers.values),
+            onTap: (latlang) {
+              if (_onTapMarker.length >= 1) {
+                _onTapMarker.clear();
+              }
+              _onAddMarkerButtonPressed(latlang);
+            }),
         Positioned(
-          bottom: 30,
+          bottom: 10,
           right: 10,
           child: FloatingActionButton(
               heroTag: "PlaceMarkerButton",
-              onPressed: _addmarker,              
+              onPressed: _addmarker,
               child: Icon(Icons.filter_tilt_shift,
                   color: Colors.white, size: 50.0)),
         ),
         Positioned(
-          bottom: 30,
+          bottom: 10,
           left: 10,
           child: FloatingActionButton(
               heroTag: "GoToUserButton",
-              onPressed: updateGoogleMap,              
-              child: Icon(Icons.pin_drop,
-                  color: Colors.white, size: 50.0)),
+              onPressed: updateGoogleMap,
+              child: Icon(Icons.pin_drop, color: Colors.white, size: 50.0)),
+        ),
+        Positioned(
+          bottom: 10,
+          left: 90,
+          child: FloatingActionButton(
+              heroTag: "QueryPositionButton",
+              onPressed: _addGeoPoint,
+              child: Icon(Icons.add, color: Colors.white, size: 50.0)),
         )
+
       ],
     );
   }
