@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_battleships/game.dart';
 import 'package:project_battleships/instructions.dart';
+import 'package:project_battleships/startgame.dart';
 
 void main() => runApp(MyApp());
 
@@ -72,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => Game(),
+                              builder: (context) => StartGame(),
                             ));
                       },
                       child: new Container(
